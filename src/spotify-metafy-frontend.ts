@@ -28,6 +28,10 @@ export class BoilerplateCard extends LitElement {
       await this.loadCardHelpers();
     }
 
+    this._config = config;
+  }
+
+  private updateConfig() {
     let cardsConfigs: any[] = [];
     for (let entity of this._entities) {
       let picHref = this.hass?.states[entity].attributes.entity_picture;
@@ -63,7 +67,6 @@ export class BoilerplateCard extends LitElement {
     };
 
     this._cardConfig = card;
-    this._config = config;
   }
 
   protected shouldUpdate(changedProps: PropertyValues): boolean {
@@ -88,10 +91,11 @@ export class BoilerplateCard extends LitElement {
   }
 
   protected render(): TemplateResult | void {
-    if (!this._cardConfig || !this.hass) {
+    if (!this._config || !this.hass) {
       return html``;
     }
 
+    this.updateConfig();
     this._card = this._helpers.createCardElement(this._cardConfig) as LovelaceCard;
     this._card.hass = this.hass;
 
