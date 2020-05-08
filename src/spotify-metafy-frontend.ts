@@ -31,6 +31,16 @@ export class BoilerplateCard extends LitElement {
     this._config = config;
   }
 
+  private shouldRender(): boolean {
+    // Wait untill all entities are loaded before rendering.
+    for (let entity of this._entities) {
+      if (!this.hass?.states[entity].state || !this.hass.states[entity].attributes?.entity_picture) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private updateConfig() {
     let cardsConfigs: any[] = [];
     for (let entity of this._entities) {
@@ -91,7 +101,7 @@ export class BoilerplateCard extends LitElement {
   }
 
   protected render(): TemplateResult | void {
-    if (!this._config || !this.hass) {
+    if (!this._config || !this.hass || !this.shouldRender()) {
       return html``;
     }
 

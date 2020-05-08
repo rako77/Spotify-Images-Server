@@ -2530,7 +2530,6 @@ let BoilerplateCard = class BoilerplateCard extends LitElement {
         return {};
     }
     async setConfig(config) {
-        var _a;
         if (!config ||
             ((!config.entitys || !Array.isArray(config.entitys)) && (!config.entities || !Array.isArray(config.entities)))) {
             throw new Error('Card config incorrect');
@@ -2539,6 +2538,20 @@ let BoilerplateCard = class BoilerplateCard extends LitElement {
         if (!this._helpers) {
             await this.loadCardHelpers();
         }
+        this._config = config;
+    }
+    shouldRender() {
+        var _a, _b;
+        // Wait untill all entities are loaded before rendering.
+        for (let entity of this._entities) {
+            if (!((_a = this.hass) === null || _a === void 0 ? void 0 : _a.states[entity].state) || !((_b = this.hass.states[entity].attributes) === null || _b === void 0 ? void 0 : _b.entity_picture)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    updateConfig() {
+        var _a;
         let cardsConfigs = [];
         for (let entity of this._entities) {
             let picHref = (_a = this.hass) === null || _a === void 0 ? void 0 : _a.states[entity].attributes.entity_picture;
@@ -2573,7 +2586,6 @@ let BoilerplateCard = class BoilerplateCard extends LitElement {
             type: 'horizontal-stack',
         };
         this._cardConfig = card;
-        this._config = config;
     }
     shouldUpdate(changedProps) {
         super.updated(changedProps);
@@ -2593,9 +2605,10 @@ let BoilerplateCard = class BoilerplateCard extends LitElement {
         return true;
     }
     render() {
-        if (!this._cardConfig || !this.hass) {
+        if (!this._config || !this.hass || !this.shouldRender()) {
             return html ``;
         }
+        this.updateConfig();
         this._card = this._helpers.createCardElement(this._cardConfig);
         this._card.hass = this.hass;
         return html `
